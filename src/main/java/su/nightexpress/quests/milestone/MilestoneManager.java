@@ -62,9 +62,9 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
         this.addListener(new MilestoneGenericListener(this.plugin, this));
 
         // Add new milestones for online players after the config reload.
-        this.plugin.runTaskAsync(task -> {
-            Players.getOnline().forEach(this::updateMilestones);
-        });
+        // Folia: 不能在 onLoad() 中使用调度器，改为在监听器中处理
+        // Players 上线时会自动通过 PlayerJoinEvent 更新里程碑
+        // 已在线的玩家会在下次交互时更新
     }
 
     @Override

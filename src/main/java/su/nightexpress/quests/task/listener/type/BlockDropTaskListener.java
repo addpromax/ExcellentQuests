@@ -68,7 +68,7 @@ public class BlockDropTaskListener extends TaskListener<ItemStack, AdapterFamily
         ItemStack itemStack = player.getInventory().getItem(slot);
         if (itemStack == null || itemStack.getType() != Material.GLASS_BOTTLE) return;
 
-        this.plugin.runTask(task -> {
+        this.plugin.runTask(() -> {
             ItemStack honey = player.getInventory().getItem(slot);
             if (honey == null || honey.getType() != Material.HONEY_BOTTLE) return;
 

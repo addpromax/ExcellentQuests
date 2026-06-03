@@ -38,7 +38,7 @@ public class UseHoeTaskListener extends TaskListener<Block, AdapterFamily<Block>
 
         // 检查方块是否变成了耕地
         // 使用 NightCore 的调度器以支持 Folia
-        this.plugin.runTaskLater(task -> {
+        this.plugin.runTaskLater(() -> {
             if (block.getType().name().contains("FARMLAND")) {
                 this.progressQuests(player, block);
             }

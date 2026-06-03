@@ -31,9 +31,9 @@ public class PlayerJoinTaskListener extends TaskListener<String, AdapterFamily<S
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         
-        // 延迟处理，确保玩家数据已加载
-        // 使用 NightCore 的调度器以支持 Folia
-        this.plugin.runTaskLater(task -> {
+        // Folia: 使用 NightCore 新版调度器的 runTaskLater(Runnable, long) 方法
+        // 该方法在 Folia 下使用 GlobalRegionScheduler，避免了不支持的 BukkitScheduler
+        this.plugin.runTaskLater(() -> {
             if (!player.isOnline() || !this.manager.canDoTasks(player)) {
                 return;
             }

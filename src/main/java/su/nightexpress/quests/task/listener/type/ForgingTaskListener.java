@@ -40,7 +40,7 @@ public class ForgingTaskListener extends TaskListener<ItemStack, AdapterFamily<I
 
         ItemStack resultCopy = new ItemStack(result);
 
-        this.plugin.runTask(task -> {
+        this.plugin.runTask(() -> {
             ItemStack updated = anvil.getItem(2);
             if (updated != null && !updated.getType().isAir()) return;
 

@@ -75,17 +75,20 @@ public class QuestManager extends AbstractManager<QuestsPlugin> {
 
         this.addListener(new QuestGenericListener(this.plugin, this));
         
-        // 定期更新在线人数统计
-        this.addAsyncTask(() -> {
-            int currentOnline = Players.getOnline().size();
-            this.globalQuestManager.updateDailyMaxOnline(currentOnline);
-        }, 20L * 60L); // 每分钟更新一次
-        
-        // 定期保存全局任务数据
-        this.addAsyncTask(this::saveGlobalQuests, 20L * 60L * 5L); // 每5分钟保存一次
-        
-        // 定时任务：每分钟检查是否到了刷新时间点
-        this.addAsyncTask(this::checkAndRefreshAllOnlinePlayers, 20L * 60L);
+        // Folia: 使用 onPostLoad 延迟启动调度任务，避免在插件加载期间使用调度器
+        this.plugin.onPostLoad(() -> {
+            // 定期更新在线人数统计
+            this.addAsyncTask(() -> {
+                int currentOnline = Players.getOnline().size();
+                this.globalQuestManager.updateDailyMaxOnline(currentOnline);
+            }, 20L * 60L); // 每分钟更新一次
+            
+            // 定期保存全局任务数据
+            this.addAsyncTask(this::saveGlobalQuests, 20L * 60L * 5L); // 每5分钟保存一次
+            
+            // 定时任务：每分钟检查是否到了刷新时间点
+            this.addAsyncTask(this::checkAndRefreshAllOnlinePlayers, 20L * 60L);
+        });
         
         // 立即加载全局任务（在reload时需要立即加载，而不是延迟）
         this.plugin.info("正在从数据库加载全局任务...");

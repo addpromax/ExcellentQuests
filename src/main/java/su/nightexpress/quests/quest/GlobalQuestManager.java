@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.util.LowerCase;
+import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.random.Rnd;
 import su.nightexpress.nightcore.util.wrapper.UniInt;
 import su.nightexpress.quests.QuestsPlugin;
@@ -252,7 +253,7 @@ public class GlobalQuestManager {
      * 获取当前在线人数
      */
     private int getCurrentMaxOnlinePlayers() {
-        return Bukkit.getOnlinePlayers().size();
+        return Players.getOnline().size();
     }
     
     /**

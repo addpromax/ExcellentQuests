@@ -59,7 +59,8 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
         FileConfig config = FileConfig.load(this.plugin.getDataFolder().getAbsolutePath(), FILE_NAME);
 
         config.initializeOptions(BattlePassConfig.class);
-        this.plugin.runTaskAsync(task -> this.loadSeasons());
+        // Folia 不支持在插件加载期间使用异步任务，改为同步加载
+        this.loadSeasons();
         this.loadLevels(config);
         this.loadUI();
         this.loadCommands();
@@ -68,7 +69,10 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
         this.addListener(new BattlePassListener(this.plugin, this));
 
-        this.addTask(this::tickSeasons, 1);
+        // Folia: 使用 onPostLoad 延迟启动调度任务，避免在插件加载期间使用调度器
+        this.plugin.onPostLoad(() -> {
+            this.addTask(this::tickSeasons, 1);
+        });
     }
 
     @Override
@@ -140,7 +144,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
                 Lang.BATTLE_PASS_SEASON_FINISHED.message().broadcast(replacer -> replacer.replace(this.season.replacePlaceholders()));
                 this.season.setLaunched(false);
-                this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveBattlePassSeason(this.season));
+                this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().saveBattlePassSeason(this.season));
                 this.battlePassMenu.flush();
             }
         }
@@ -151,7 +155,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
                 Lang.BATTLE_PASS_SEASON_LAUNCHED.message().broadcast(replacer -> replacer.replace(this.season.replacePlaceholders()));
                 this.season.setLaunched(true);
-                this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveBattlePassSeason(this.season));
+                this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().saveBattlePassSeason(this.season));
                 // 赛季启动时，为所有在线玩家刷新任务
                 this.plugin.questManager().ifPresent(questManager -> {
                     Players.getOnline().forEach(questManager::checkAndRefreshPlayerQuests);
@@ -173,7 +177,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
         UUID id = UUID.randomUUID();
         BattlePassSeason newSeason = new BattlePassSeason(id, name, startTime, endDate, expireDate, true);
-        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().insertBattlePassSeason(newSeason));
+        this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().insertBattlePassSeason(newSeason));
 
         this.setSeason(newSeason); // Set as current season, as there should be no more than 1 active/scheduled season.
         this.loadSeason(newSeason); // Load it to the map.
@@ -191,7 +195,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
         BattlePassSeason season = this.season;
         season.setLaunched(false);
 
-        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().removeBattlePassSeason(season));
+        this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().removeBattlePassSeason(season));
         this.seasonMap.remove(season.getId());
         this.setSeason(null);
         this.battlePassMenu.close();
