@@ -73,6 +73,32 @@ public class RewardManager extends AbstractManager<QuestsPlugin> {
     public List<Reward> getMilestoneRewards(@NotNull Milestone milestone) {
         return this.parseRewards(milestone.getRewards());
     }
+    
+    /**
+     * 获取里程碑特定等级的奖励
+     * @param milestone 里程碑
+     * @param level 等级（从 1 开始）
+     * @return 对应等级的奖励，如果等级超出范围则返回空列表
+     */
+    @NotNull
+    public List<Reward> getMilestoneRewardForLevel(@NotNull Milestone milestone, int level) {
+        List<String> allRewardIds = milestone.getRewards();
+        
+        // 等级索引（等级 1 对应索引 0）
+        int index = level - 1;
+        
+        // 检查索引是否有效
+        if (index < 0 || index >= allRewardIds.size()) {
+            return Collections.emptyList();
+        }
+        
+        // 获取对应等级的奖励ID
+        String rewardId = allRewardIds.get(index);
+        
+        // 查找并返回奖励
+        Reward reward = this.getRewardById(rewardId);
+        return reward == null ? Collections.emptyList() : Collections.singletonList(reward);
+    }
 
     @NotNull
     public List<Reward> parseRewards(@NotNull Collection<String> rewardIds) {

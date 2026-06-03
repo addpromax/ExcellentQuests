@@ -152,7 +152,10 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
                 Lang.BATTLE_PASS_SEASON_LAUNCHED.message().broadcast(replacer -> replacer.replace(this.season.replacePlaceholders()));
                 this.season.setLaunched(true);
                 this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveBattlePassSeason(this.season));
-                this.plugin.questManager().ifPresent(QuestManager::updatePlayerQuests);
+                // 赛季启动时，为所有在线玩家刷新任务
+                this.plugin.questManager().ifPresent(questManager -> {
+                    Players.getOnline().forEach(questManager::checkAndRefreshPlayerQuests);
+                });
                 this.battlePassMenu.flush();
             }
         }

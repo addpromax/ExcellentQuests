@@ -1,5 +1,6 @@
 package su.nightexpress.quests;
 
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.NightPlugin;
@@ -11,6 +12,7 @@ import su.nightexpress.quests.config.Config;
 import su.nightexpress.quests.config.Lang;
 import su.nightexpress.quests.config.Perms;
 import su.nightexpress.quests.data.DataHandler;
+import su.nightexpress.quests.hook.QuestsPlaceholderExpansion;
 import su.nightexpress.quests.milestone.MilestoneManager;
 import su.nightexpress.quests.reward.RewardManager;
 import su.nightexpress.quests.task.TaskManager;
@@ -29,6 +31,7 @@ public class QuestsPlugin extends NightPlugin {
     private BattlePassManager battlePassManager;
     private MilestoneManager  milestoneManager;
     private QuestManager      questManager;
+    private QuestsPlaceholderExpansion placeholderExpansion;
 
     @Override
     @NotNull
@@ -78,6 +81,8 @@ public class QuestsPlugin extends NightPlugin {
         if (Config.FEATURES_MILESTONES_ENABLED.get()) {
             this.milestoneManager = new MilestoneManager(this);
             this.milestoneManager.setup();
+        } else {
+            this.warn("里程碑系统已禁用！");
         }
 
         if (Config.FEATURES_QUESTS_ENABLED.get()) {
@@ -86,10 +91,29 @@ public class QuestsPlugin extends NightPlugin {
         }
 
         this.loadCommands();
+        this.registerPlaceholderAPI();
+        
+        this.info("ExcellentQuests 插件启用完成！");
+    }
+    
+    private void registerPlaceholderAPI() {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            this.placeholderExpansion = new QuestsPlaceholderExpansion(this);
+            boolean success = this.placeholderExpansion.register();
+            if (success) {
+                this.info("PlaceholderAPI 扩展注册成功");
+            } else {
+                this.warn("PlaceholderAPI 扩展注册失败");
+            }
+        }
     }
 
     @Override
     public void disable() {
+        if (this.placeholderExpansion != null) {
+            this.placeholderExpansion.unregister();
+            this.placeholderExpansion = null;
+        }
         if (this.taskManager != null) this.taskManager.shutdown();
         if (this.milestoneManager != null) this.milestoneManager.shutdown();
         if (this.questManager != null) this.questManager.shutdown();
@@ -158,5 +182,14 @@ public class QuestsPlugin extends NightPlugin {
     @NotNull
     public Optional<QuestManager> questManager() {
         return Optional.ofNullable(this.questManager);
+    }
+
+    /**
+     * 调试日志输出，只在 debug 模式开启时输出
+     */
+    public void debug(@NotNull String message) {
+        if (Config.isDebugMode()) {
+            this.info("[DEBUG] " + message);
+        }
     }
 }

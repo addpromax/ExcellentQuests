@@ -67,7 +67,9 @@ public class MilestonesMenu extends LinkedMenu<QuestsPlugin, MilestoneCategory> 
                 int level = data.getFirstIncompletedLevel(milestone);
                 int units = data.countTotalProgress(milestone);
                 double progress = data.getTotalProgressValue(milestone);
-                List<Reward> rewards = this.plugin.getRewardManager().getMilestoneRewards(milestone);
+                
+                // 获取当前等级的奖励（而不是所有奖励）
+                List<Reward> rewards = this.plugin.getRewardManager().getMilestoneRewardForLevel(milestone, level);
 
                 return milestone.getIcon()
                     .hideAllComponents()

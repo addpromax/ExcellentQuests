@@ -33,8 +33,14 @@ public class QuestDataSerializer implements JsonSerializer<QuestData>, JsonDeser
         int xpReward = object.get("xpReward").getAsInt();
         boolean active = object.get("active").getAsBoolean();
         long expireDate = object.get("expireDate").getAsLong();
+        
+        // 读取全局任务ID（可能为null）
+        UUID globalQuestId = null;
+        if (object.has("globalQuestId") && !object.get("globalQuestId").isJsonNull()) {
+            globalQuestId = UUID.fromString(object.get("globalQuestId").getAsString());
+        }
 
-        return new QuestData(id, missionId, objectives, rewardIds, scale, xpReward, active, expireDate);
+        return new QuestData(id, missionId, objectives, rewardIds, scale, xpReward, active, expireDate, globalQuestId);
     }
 
     @Override
@@ -55,6 +61,13 @@ public class QuestDataSerializer implements JsonSerializer<QuestData>, JsonDeser
         object.addProperty("xpReward", data.getXPReward());
         object.addProperty("active", data.isActive());
         object.addProperty("expireDate", data.getExpireDate());
+        
+        // 保存全局任务ID（可能为null）
+        if (data.getGlobalQuestId() != null) {
+            object.addProperty("globalQuestId", data.getGlobalQuestId().toString());
+        } else {
+            object.add("globalQuestId", null);
+        }
 
         return object;
     }

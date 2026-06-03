@@ -23,6 +23,12 @@ public class Config {
         "Sets date time format."
     ).whenRead(QuestUtils::setDateTimeFormatter);
 
+    public static final ConfigValue<Boolean> GENERAL_DEBUG_MODE = ConfigValue.create("General.DebugMode",
+        false,
+        "启用后会在控制台输出详细的调试信息，用于排查任务进度等问题。",
+        "Enable this to print detailed debug information to console for troubleshooting quest progress."
+    );
+
     public static final ConfigValue<Boolean> FEATURES_BATTLE_PASS_ENABLED = ConfigValue.create("Features.BattlePass.Enabled",
         true,
         "Enables the Battle Pass feature."
@@ -74,7 +80,32 @@ public class Config {
     public static final ConfigValue<RankTable> QUESTS_AMOUT_PER_RANK = ConfigValue.create("Quests.AmountPerRank",
         RankTable::read,
         RankTable.builder(RankTable.Mode.RANK, 3).addRankValue("vip", 4).addRankValue("premium", 5).build(),
-        "Amount of randomly generated daily quests for players based on their rank/permissions."
+        "Amount of randomly generated daily quests for players based on their rank/permissions.",
+        "[已弃用] 请使用 DailyQuestsAmountPerRank 替代"
+    );
+    
+    public static final ConfigValue<RankTable> QUESTS_DAILY_AMOUNT_PER_RANK = ConfigValue.create("Quests.DailyQuestsAmountPerRank",
+        RankTable::read,
+        RankTable.builder(RankTable.Mode.RANK, 3).addRankValue("vip", 4).addRankValue("premium", 5).build(),
+        "每日任务数量。根据玩家权限/等级随机生成的任务数量。"
+    );
+    
+    public static final ConfigValue<RankTable> QUESTS_WEEKLY_AMOUNT_PER_RANK = ConfigValue.create("Quests.WeeklyQuestsAmountPerRank",
+        RankTable::read,
+        RankTable.builder(RankTable.Mode.RANK, 2).addRankValue("vip", 3).addRankValue("premium", 4).build(),
+        "每周任务数量。根据玩家权限/等级随机生成的任务数量。"
+    );
+    
+    public static final ConfigValue<RankTable> QUESTS_MONTHLY_AMOUNT_PER_RANK = ConfigValue.create("Quests.MonthlyQuestsAmountPerRank",
+        RankTable::read,
+        RankTable.builder(RankTable.Mode.RANK, 1).addRankValue("vip", 2).addRankValue("premium", 3).build(),
+        "每月任务数量。根据玩家权限/等级随机生成的任务数量。"
+    );
+    
+    public static final ConfigValue<RankTable> QUESTS_SEASONAL_AMOUNT_PER_RANK = ConfigValue.create("Quests.SeasonalQuestsAmountPerRank",
+        RankTable::read,
+        RankTable.builder(RankTable.Mode.RANK, 5).addRankValue("vip", 7).addRankValue("premium", 10).build(),
+        "赛季任务数量。根据玩家权限/等级随机生成的任务数量。"
     );
 
     public static final ConfigValue<Boolean> ANTI_ABUSE_COUNT_PLAYER_BLOCKS = ConfigValue.create("AntiAbuse.CountPlayerBlocks",
@@ -141,5 +172,9 @@ public class Config {
 
     public static boolean isQuestsForBattlePass() {
         return QUESTS_BATTLE_PASS_MODE.get();
+    }
+
+    public static boolean isDebugMode() {
+        return GENERAL_DEBUG_MODE.get();
     }
 }

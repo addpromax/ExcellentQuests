@@ -21,6 +21,11 @@ public class QuestData {
 
     private boolean active;
     private long    expireDate;
+    
+    // 已废弃：全局任务引用（保留用于向后兼容，但不再使用）
+    // 全局任务现在直接从 GlobalQuestManager 读取，不再在玩家数据中存储引用
+    @Deprecated
+    private UUID globalQuestId;
 
     public QuestData(@NotNull UUID id,
                      @NotNull String questId,
@@ -38,6 +43,27 @@ public class QuestData {
         this.xpReward = xpReward;
         this.active = active;
         this.expireDate = expireDate;
+        this.globalQuestId = null;
+    }
+    
+    public QuestData(@NotNull UUID id,
+                     @NotNull String questId,
+                     @NotNull Map<String, QuestCounter> objectiveCounter,
+                     @NotNull Set<String> rewardIds,
+                     double scale,
+                     int xpReward,
+                     boolean active,
+                     long expireDate,
+                     @Nullable UUID globalQuestId) {
+        this.id = id;
+        this.questId = questId;
+        this.objectiveCounter = objectiveCounter;
+        this.rewardIds = rewardIds;
+        this.scale = scale;
+        this.xpReward = xpReward;
+        this.active = active;
+        this.expireDate = expireDate;
+        this.globalQuestId = globalQuestId;
     }
 
     public double getProgressValue() {
@@ -136,5 +162,25 @@ public class QuestData {
 
     public void setExpireDate(long expireDate) {
         this.expireDate = expireDate;
+    }
+    
+    @Nullable
+    @Deprecated
+    public UUID getGlobalQuestId() {
+        return this.globalQuestId;
+    }
+    
+    @Deprecated
+    public void setGlobalQuestId(@Nullable UUID globalQuestId) {
+        this.globalQuestId = globalQuestId;
+    }
+    
+    /**
+     * 检查是否为全局任务引用（旧数据）
+     * 用于清理旧的引用数据
+     */
+    @Deprecated
+    public boolean isGlobalQuest() {
+        return this.globalQuestId != null;
     }
 }

@@ -37,7 +37,8 @@ public class MilestoneObjectiveTable extends AbstractObjectiveTable<MilestoneObj
             MilestoneObjective objective = MilestoneObjective.deserialize(data);
             entires.put(name, objective);
 
-            config.setInlineComments(fullPath, ENTRY_DEFINITION_COMMENT);
+            // 使用块注释代替行内注释，以兼容 SnakeYAML 2.2+
+            config.setComments(fullPath, ENTRY_DEFINITION_COMMENT);
         });
 
         return new MilestoneObjectiveTable(entires);

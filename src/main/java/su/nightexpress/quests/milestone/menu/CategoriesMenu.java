@@ -49,7 +49,10 @@ public class CategoriesMenu extends NormalMenu<QuestsPlugin> implements ConfigBa
         int categoryCount = categories.size();
         int[] categorySlots = Optional.ofNullable(this.slotsByCategoryCount.ceilingEntry(categoryCount)).map(Map.Entry::getValue).orElse(new int[0]);
 
-        for (int index = 0; index < categorySlots.length; index++) {
+        // 确保不会越界：使用实际分类数量和槽位数量的最小值
+        int itemsToDisplay = Math.min(categorySlots.length, categories.size());
+        
+        for (int index = 0; index < itemsToDisplay; index++) {
             int slot = categorySlots[index];
             MilestoneCategory category = categories.get(index);
             Set<Milestone> milestones = this.manager.getMilestonesByCategory(category);
@@ -79,7 +82,8 @@ public class CategoriesMenu extends NormalMenu<QuestsPlugin> implements ConfigBa
 
     @Override
     public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
-        for (int count = 0; count < 10; count++) {
+        // 支持最多 30 个分类
+        for (int count = 0; count < 30; count++) {
             int amount = count + 1;
             int[] defSlots = getDefaultSlots(amount);
             int[] skillSlots = ConfigValue.create("Category.SlotsByCount." + amount, defSlots).read(config);
@@ -114,7 +118,25 @@ public class CategoriesMenu extends NormalMenu<QuestsPlugin> implements ConfigBa
             case 8 -> new int[]{20, 21, 22, 23, 24, 30, 31, 32};
             case 9 -> new int[]{20, 21, 22, 23, 24, 29, 30, 32, 33};
             case 10 -> new int[]{20, 21, 22, 23, 24, 29, 30, 31, 32, 33};
-            default -> new int[]{};
+            case 11 -> new int[]{20, 21, 22, 23, 24, 28, 29, 30, 31, 32, 33};
+            case 12 -> new int[]{19, 20, 21, 22, 23, 24, 28, 29, 30, 31, 32, 33};
+            case 13 -> new int[]{19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33};
+            case 14 -> new int[]{19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33};
+            case 15 -> new int[]{19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33, 34};
+            case 16 -> new int[]{18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33, 34};
+            case 17 -> new int[]{18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+            case 18 -> new int[]{18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
+            // 19-27: 从槽位9开始填满整个中间3行
+            case 19 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
+            case 20 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29};
+            case 21 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
+            case 22 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30};
+            case 23 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+            case 24 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+            case 25 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33};
+            case 26 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+            case 27 -> new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
+            default -> new int[]{}; // 超过27个分类，返回空数组
         };
     }
 }

@@ -22,10 +22,17 @@ public class KillingTaskListener extends TaskListener<Entity, AdapterFamily<Enti
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTaskKill(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
-        if (this.manager.isSpawnerMob(entity)) return;
-
         Player player = entity.getKiller();
-        if (player == null || !this.manager.canDoTasks(player)) return;
+        
+        if (player == null) return;
+        
+        if (this.manager.isSpawnerMob(entity)) {
+            return;
+        }
+
+        if (!this.manager.canDoTasks(player)) {
+            return;
+        }
 
         this.progressQuests(player, entity);
     }

@@ -3,6 +3,7 @@ package su.nightexpress.quests.data;
 import com.google.common.reflect.TypeToken;
 import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.UpdateQuery;
+import su.nightexpress.nightcore.db.sql.util.WhereOperator;
 import su.nightexpress.quests.battlepass.definition.BattlePassSeason;
 import su.nightexpress.quests.milestone.data.MilestoneData;
 import su.nightexpress.quests.quest.data.QuestData;
@@ -32,7 +33,32 @@ public class DataQueries {
             // Remove battle pass datas for expired battle pass seasons.
             battlePassData.values().removeIf(BattlePassData::isExpired);
 
-            return new QuestUser(uuid, name, dateCreated, lastOnline, newQuestsDate, battlePassData, questData, milestoneData);
+            QuestUser user = new QuestUser(uuid, name, dateCreated, lastOnline, newQuestsDate, battlePassData, questData, milestoneData);
+            
+            // 加载周期任务重置时间
+            try {
+                long newDailyQuestsDate = resultSet.getLong(DataHandler.COLUMN_NEW_DAILY_QUESTS_DATE.getName());
+                long newWeeklyQuestsDate = resultSet.getLong(DataHandler.COLUMN_NEW_WEEKLY_QUESTS_DATE.getName());
+                long newMonthlyQuestsDate = resultSet.getLong(DataHandler.COLUMN_NEW_MONTHLY_QUESTS_DATE.getName());
+                
+                user.setNewDailyQuestsDate(newDailyQuestsDate);
+                user.setNewWeeklyQuestsDate(newWeeklyQuestsDate);
+                user.setNewMonthlyQuestsDate(newMonthlyQuestsDate);
+            } catch (SQLException e) {
+                // 可能是旧数据，没有这些字段，使用默认值0
+            }
+            
+            // 加载上次登录日期
+            try {
+                String lastLoginDate = resultSet.getString(DataHandler.COLUMN_LAST_LOGIN_DATE.getName());
+                if (lastLoginDate != null) {
+                    user.setLastLoginDate(lastLoginDate);
+                }
+            } catch (SQLException e) {
+                // 可能是旧数据，没有这个字段，使用默认值空字符串
+            }
+            
+            return user;
         }
         catch (SQLException exception) {
             exception.printStackTrace();
@@ -67,4 +93,36 @@ public class DataQueries {
 
     public static final UpdateQuery<BattlePassSeason> SEASON_UPDATE = new UpdateQuery<BattlePassSeason>()
         .setValue(DataHandler.COLUMN_BP_ACTIVE, season -> String.valueOf(season.isLaunched() ? 1 : 0));
+
+    // 全局任务查询
+    public static final Function<ResultSet, su.nightexpress.quests.quest.data.GlobalQuestData> GLOBAL_QUEST_LOADER = resultSet -> {
+        try {
+            String dataJson = resultSet.getString(DataHandler.COLUMN_GQ_DATA.getName());
+            return DataHandler.GSON.fromJson(dataJson, su.nightexpress.quests.quest.data.GlobalQuestData.class);
+        }
+        catch (SQLException exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    };
+
+    public static final InsertQuery<su.nightexpress.quests.quest.data.GlobalQuestData> GLOBAL_QUEST_INSERT = 
+        new InsertQuery<su.nightexpress.quests.quest.data.GlobalQuestData>()
+            .setValue(DataHandler.COLUMN_GQ_ID, quest -> quest.getId().toString())
+            .setValue(DataHandler.COLUMN_GQ_QUEST_ID, su.nightexpress.quests.quest.data.GlobalQuestData::getQuestId)
+            .setValue(DataHandler.COLUMN_GQ_QUEST_TYPE, quest -> quest.getQuestType().name())
+            .setValue(DataHandler.COLUMN_GQ_DATA, quest -> DataHandler.GSON.toJson(quest))
+            .setValue(DataHandler.COLUMN_GQ_EXPIRE_DATE, quest -> String.valueOf(quest.getExpireDate()))
+            .setValue(DataHandler.COLUMN_GQ_CREATE_DATE, quest -> String.valueOf(quest.getCreateDate()))
+            .setValue(DataHandler.COLUMN_GQ_ACTIVE, quest -> String.valueOf(quest.isActive() ? 1 : 0));
+
+    public static final UpdateQuery<su.nightexpress.quests.quest.data.GlobalQuestData> GLOBAL_QUEST_UPDATE = 
+        new UpdateQuery<su.nightexpress.quests.quest.data.GlobalQuestData>()
+            .setValue(DataHandler.COLUMN_GQ_QUEST_ID, su.nightexpress.quests.quest.data.GlobalQuestData::getQuestId)
+            .setValue(DataHandler.COLUMN_GQ_QUEST_TYPE, quest -> quest.getQuestType().name())
+            .setValue(DataHandler.COLUMN_GQ_DATA, quest -> DataHandler.GSON.toJson(quest))
+            .setValue(DataHandler.COLUMN_GQ_EXPIRE_DATE, quest -> String.valueOf(quest.getExpireDate()))
+            .setValue(DataHandler.COLUMN_GQ_CREATE_DATE, quest -> String.valueOf(quest.getCreateDate()))
+            .setValue(DataHandler.COLUMN_GQ_ACTIVE, quest -> String.valueOf(quest.isActive() ? 1 : 0))
+            .where(DataHandler.COLUMN_GQ_ID, WhereOperator.EQUAL, quest -> quest.getId().toString());
 }

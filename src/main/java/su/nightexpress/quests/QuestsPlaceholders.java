@@ -32,6 +32,21 @@ public class QuestsPlaceholders extends Placeholders {
     public static final String GENERIC_TIMELEFT            = "%timeleft%";
     public static final String GENERIC_REFRESH_TIME        = "%refresh_time%";
     public static final String GENERIC_XP                  = "%xp%";
+    public static final String GENERIC_SLOTS_LEFT          = "%slots_left%";
+    public static final String QUEST_DATA_ID               = "%quest_data_id%";
+    
+    // 合作任务排名占位符
+    public static final String COOP_RANK_1_PLAYER          = "%rank_1_player%";
+    public static final String COOP_RANK_1_CONTRIBUTION    = "%rank_1_contribution%";
+    public static final String COOP_RANK_1_REWARDS         = "%rank_1_rewards%";
+    public static final String COOP_RANK_2_PLAYER          = "%rank_2_player%";
+    public static final String COOP_RANK_2_CONTRIBUTION    = "%rank_2_contribution%";
+    public static final String COOP_RANK_2_REWARDS         = "%rank_2_rewards%";
+    public static final String COOP_RANK_3_PLAYER          = "%rank_3_player%";
+    public static final String COOP_RANK_3_CONTRIBUTION    = "%rank_3_contribution%";
+    public static final String COOP_RANK_3_REWARDS         = "%rank_3_rewards%";
+    public static final String COOP_COMPLETED_PLAYERS      = "%completed_players%";
+    public static final String COOP_REWARDS_INLINE         = "%rewards_inline%";
 
     public static final Function<String, String> VARIABLE = str -> "%" + str + "%";
 
@@ -45,7 +60,6 @@ public class QuestsPlaceholders extends Placeholders {
 
     public static final String QUEST_NAME            = "%quest_name%";
     public static final String QUEST_DESCRIPTION     = "%quest_description%";
-    public static final String QUEST_COMPLETION_TIME = "%quest_completion_time%";
 
     public static final String BATTLE_PASS_LEVEL     = "%battle_pass_level%";
     public static final String BATTLE_PASS_XP        = "%battle_pass_xp%";
@@ -77,7 +91,6 @@ public class QuestsPlaceholders extends Placeholders {
     public static final PlaceholderList<Quest> QUEST = PlaceholderList.create(list -> list
         .add(QUEST_NAME, Quest::getName)
         .add(QUEST_DESCRIPTION, quest -> String.join(TagWrappers.BR, quest.getDescription()))
-        .add(QUEST_COMPLETION_TIME, quest -> TimeFormats.toLiteral(quest.getCompletionTime() * 1000L))
     );
 
     public static final PlaceholderList<BattlePassData> BATTLE_PASS_DATA = PlaceholderList.create(list -> list

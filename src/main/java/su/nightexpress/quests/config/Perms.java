@@ -14,11 +14,14 @@ public class Perms {
     public static final UniPermission BYPASS  = new UniPermission(PREFIX_BYPASS + QuestsPlaceholders.WILDCARD);
 
     public static final UniPermission BATTLE_PASS_PREMIUM = new UniPermission(PREFIX + "battlepass.premium");
+    public static final UniPermission QUESTS_VIEW_ID = new UniPermission(PREFIX + "quests.viewid");
 
     public static final UniPermission COMMAND_RELOAD = new UniPermission(PREFIX_COMMAND + "reload");
 
     public static final UniPermission COMMAND_QUESTS         = new UniPermission(PREFIX_COMMAND + "quests");
     public static final UniPermission COMMAND_QUESTS_REFRESH = new UniPermission(PREFIX_COMMAND + "quests.refresh");
+    public static final UniPermission COMMAND_QUESTS_DELETE  = new UniPermission(PREFIX_COMMAND + "quests.delete");
+    public static final UniPermission COMMAND_QUESTS_FORCE_COMPLETE = new UniPermission(PREFIX_COMMAND + "quests.forcecomplete");
 
     public static final UniPermission COMMAND_MILESTONES       = new UniPermission(PREFIX_COMMAND + "milestones");
     public static final UniPermission COMMAND_MILESTONES_RESET = new UniPermission(PREFIX_COMMAND + "milestones.reset");
@@ -39,6 +42,7 @@ public class Perms {
     static {
         PLUGIN.addChildren(
             BATTLE_PASS_PREMIUM,
+            QUESTS_VIEW_ID,
             COMMAND,
             BYPASS
         );
@@ -47,6 +51,8 @@ public class Perms {
             COMMAND_RELOAD,
             COMMAND_QUESTS,
             COMMAND_QUESTS_REFRESH,
+            COMMAND_QUESTS_DELETE,
+            COMMAND_QUESTS_FORCE_COMPLETE,
 
             COMMAND_MILESTONES,
             COMMAND_MILESTONES_RESET,

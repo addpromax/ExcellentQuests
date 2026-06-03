@@ -35,9 +35,11 @@ public class BlockBreakTaskListener extends TaskListener<Block, AdapterFamily<Bl
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTaskBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        if (!this.manager.canDoTasks(player)) return;
-
         Block block = event.getBlock();
+        
+        if (!this.manager.canDoTasks(player)) {
+            return;
+        }
 
         this.handleBreak(player, block);
     }

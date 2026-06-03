@@ -17,11 +17,13 @@ import java.util.function.Function;
 public class Reward implements Writeable {
 
     private final String                name;
+    private final List<String>          lore;  // 新增：奖励描述
     private final List<String>          commands;
     private final Map<String, Variable> variables;
 
-    public Reward(@NotNull String name, @NotNull List<String> commands, @NotNull Map<String, Variable> variables) {
+    public Reward(@NotNull String name, @NotNull List<String> lore, @NotNull List<String> commands, @NotNull Map<String, Variable> variables) {
         this.name = name;
+        this.lore = lore;
         this.commands = commands;
         this.variables = variables;
     }
@@ -40,9 +42,10 @@ public class Reward implements Writeable {
         });
 
         String name = ConfigValue.create(path + ".Name", "null").read(config);
+        List<String> lore = ConfigValue.create(path + ".Lore", Collections.emptyList()).read(config);
         List<String> commands = ConfigValue.create(path + ".Commands", Collections.emptyList()).read(config);
 
-        return new Reward(name, commands, variables);
+        return new Reward(name, lore, commands, variables);
     }
 
     @Override
@@ -52,6 +55,7 @@ public class Reward implements Writeable {
             config.set(path + ".Variables." + name, variable);
         });
         config.set(path + ".Name", this.name);
+        config.set(path + ".Lore", this.lore);
         config.set(path + ".Commands", this.commands);
     }
 
@@ -68,6 +72,11 @@ public class Reward implements Writeable {
     public String getName(int units, int level, double scale) {
         return this.variableReplacer(units, level, scale, NumberUtil::format).apply(this.name);
     }
+    
+    @NotNull
+    public List<String> getLore(int units, int level, double scale) {
+        return this.variableReplacer(units, level, scale, NumberUtil::format).apply(this.lore);
+    }
 
     public void runCommands(@NotNull Player player, int units, int level, double scale) {
         Players.dispatchCommands(player, this.variableReplacer(units, level, scale, String::valueOf).apply(this.commands));
@@ -82,9 +91,10 @@ public class Reward implements Writeable {
 
         @NotNull
         public static Variable read(@NotNull FileConfig config, @NotNull String path) {
-            config.setInlineComments(path + ".Base", "Base value.");
-            config.setInlineComments(path + ".UnitBonus", "Bonus value per objective unit. (Quests and Milestones only)");
-            config.setInlineComments(path + ".LevelBonus", "Bonus value for specific level(s). [LV1, LV2, LV3, ..., LV99] (Milestones and Battle Pass only)");
+            // 使用块注释代替行内注释，以兼容 SnakeYAML 2.2+
+            config.setComments(path + ".Base", "Base value.");
+            config.setComments(path + ".UnitBonus", "Bonus value per objective unit. (Quests and Milestones only)");
+            config.setComments(path + ".LevelBonus", "Bonus value for specific level(s). [LV1, LV2, LV3, ..., LV99] (Milestones and Battle Pass only)");
 
             double base = ConfigValue.create(path + ".Base", 0).read(config);
             double unitBonus = ConfigValue.create(path + ".UnitBonus", 0).read(config);
@@ -116,18 +126,26 @@ public class Reward implements Writeable {
     public static class Builder {
 
         private final String                name;
+        private final List<String>          lore;
         private final List<String>          commands;
         private final Map<String, Variable> variables;
 
         public Builder(@NotNull String name) {
             this.name = name;
+            this.lore = new ArrayList<>();
             this.commands = new ArrayList<>();
             this.variables = new HashMap<>();
         }
 
         @NotNull
         public Reward build() {
-            return new Reward(this.name, this.commands, this.variables);
+            return new Reward(this.name, this.lore, this.commands, this.variables);
+        }
+        
+        @NotNull
+        public Builder lore(@NotNull String... lore) {
+            this.lore.addAll(Arrays.asList(lore));
+            return this;
         }
 
         @NotNull

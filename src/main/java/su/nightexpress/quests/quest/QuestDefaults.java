@@ -29,6 +29,8 @@ public class QuestDefaults {
         createCraftingQuests(manager);
         createSmeltingQuests(manager);
         createBrewingQuests(manager);
+        createCooperativeQuests(manager);
+        createCompetitiveQuests(manager);
     }
 
     private static void createMiningQuests(@NotNull QuestManager manager) {
@@ -385,6 +387,271 @@ public class QuestDefaults {
             });
     }
 
+    private static void createCooperativeQuests(@NotNull QuestManager manager) {
+        createCooperativeQuest(manager, TaskTypeId.BREAK_BLOCK,
+            "Server Mining Event",
+            Lists.newList(
+                GOLD.wrap("§6[合作任务]"),
+                GRAY.wrap("全服玩家共同挖掘方块！"),
+                DARK_GRAY.wrap("目标数量根据在线人数动态调整")
+            ),
+            Material.DIAMOND_PICKAXE,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(Material.STONE, Adapter.VANILLA_BLOCK, 1000, 1000, 100, 1)
+                    .build());
+                quest.setCooperativeFormula("%maxplayer%*20");
+                quest.setCompletionTime(86400);
+            });
+
+        createCooperativeQuest(manager, TaskTypeId.KILL_MOB,
+            "Monster Invasion",
+            Lists.newList(
+                GOLD.wrap("§6[合作任务]"),
+                GRAY.wrap("全服一起抵御怪物入侵！"),
+                DARK_GRAY.wrap("所有玩家共享进度")
+            ),
+            Material.DIAMOND_SWORD,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 2));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(EntityType.ZOMBIE, Adapter.VANILLA_MOB, 500, 500, 50, 2)
+                    .addType(EntityType.SKELETON, Adapter.VANILLA_MOB, 500, 500, 30, 2.5)
+                    .addType(EntityType.CREEPER, Adapter.VANILLA_MOB, 300, 300, 20, 3)
+                    .build());
+                quest.setCooperativeFormula("%maxplayer%*15");
+                quest.setCompletionTime(86400);
+            });
+
+        createCooperativeQuest(manager, TaskTypeId.PLACE_BLOCK,
+            "Community Building",
+            Lists.newList(
+                GOLD.wrap("§6[合作任务]"),
+                GRAY.wrap("全服一起建设家园！"),
+                DARK_GRAY.wrap("放置任意方块都计入进度")
+            ),
+            Material.GRASS_BLOCK,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addEntry("minecraft:*", Adapter.VANILLA_BLOCK, 2000, 2000, 100.0, 0.5)
+                    .build());
+                quest.setCooperativeFormula("%maxplayer%*25");
+                quest.setCompletionTime(86400);
+            });
+
+        createCooperativeQuest(manager, TaskTypeId.CRAFT_ITEM,
+            "Industrial Revolution",
+            Lists.newList(
+                GOLD.wrap("§6[合作任务]"),
+                GRAY.wrap("全服共同生产工具！"),
+                DARK_GRAY.wrap("合作完成大量制作")
+            ),
+            Material.CRAFTING_TABLE,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 2));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(Material.IRON_PICKAXE, Adapter.VANILLA_ITEM, 100, 100, 40, 3)
+                    .addType(Material.IRON_AXE, Adapter.VANILLA_ITEM, 100, 100, 30, 3)
+                    .addType(Material.IRON_SWORD, Adapter.VANILLA_ITEM, 100, 100, 30, 3)
+                    .build());
+                quest.setCooperativeFormula("%maxplayer%*8");
+                quest.setCompletionTime(86400);
+            });
+
+        createCooperativeQuest(manager, TaskTypeId.FISH_ITEM,
+            "Fishing Tournament",
+            Lists.newList(
+                GOLD.wrap("§6[合作任务]"),
+                GRAY.wrap("全服钓鱼大赛！"),
+                DARK_GRAY.wrap("一起钓上足够的鱼")
+            ),
+            Material.FISHING_ROD,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addEntry("minecraft:*", Adapter.VANILLA_ITEM, 500, 500, 100.0, 2.0)
+                    .build());
+                quest.setCooperativeFormula("%maxplayer%*12");
+                quest.setCompletionTime(86400);
+            });
+    }
+
+    private static void createCompetitiveQuests(@NotNull QuestManager manager) {
+        createCompetitiveQuest(manager, TaskTypeId.KILL_MOB,
+            "Dragon Slayer",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("击杀末影龙！"),
+                DARK_GRAY.wrap("仅前3名完成者获得奖励")
+            ),
+            Material.DRAGON_HEAD,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(EntityType.ENDER_DRAGON, Adapter.VANILLA_MOB, 1, 1, 100, 500)
+                    .build());
+                quest.setCompetitiveMaxCompletions(3);
+                quest.setCompetitiveUsePercent(false);
+                quest.setBattlePassXPReward(50, 10);
+                quest.setCompletionTime(86400);
+            });
+
+        createCompetitiveQuest(manager, TaskTypeId.KILL_MOB,
+            "Wither Hunter",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("击杀凋灵！"),
+                DARK_GRAY.wrap("限5人完成")
+            ),
+            Material.WITHER_SKELETON_SKULL,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(EntityType.WITHER, Adapter.VANILLA_MOB, 1, 1, 100, 400)
+                    .build());
+                quest.setCompetitiveMaxCompletions(5);
+                quest.setCompetitiveUsePercent(false);
+                quest.setBattlePassXPReward(40, 8);
+                quest.setCompletionTime(86400);
+            });
+
+        createCompetitiveQuest(manager, TaskTypeId.BREAK_BLOCK,
+            "Speed Mining",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("快速挖掘钻石矿！"),
+                DARK_GRAY.wrap("前10%玩家获得奖励")
+            ),
+            Material.DIAMOND_ORE,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(Material.DIAMOND_ORE, Adapter.VANILLA_BLOCK, 32, 32, 100, 15)
+                    .addType(Material.DEEPSLATE_DIAMOND_ORE, Adapter.VANILLA_BLOCK, 32, 32, 100, 15)
+                    .build());
+                quest.setCompetitiveMaxCompletionPercent(0.1);
+                quest.setCompetitiveUsePercent(true);
+                quest.setBattlePassXPReward(30, 5);
+                quest.setCompletionTime(43200);
+            });
+
+        createCompetitiveQuest(manager, TaskTypeId.CRAFT_ITEM,
+            "Master Craftsman",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("制作下界合金装备！"),
+                DARK_GRAY.wrap("限8人完成")
+            ),
+            Material.NETHERITE_CHESTPLATE,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(Material.NETHERITE_HELMET, Adapter.VANILLA_ITEM, 1, 1, 25, 100)
+                    .addType(Material.NETHERITE_CHESTPLATE, Adapter.VANILLA_ITEM, 1, 1, 25, 100)
+                    .addType(Material.NETHERITE_LEGGINGS, Adapter.VANILLA_ITEM, 1, 1, 25, 100)
+                    .addType(Material.NETHERITE_BOOTS, Adapter.VANILLA_ITEM, 1, 1, 25, 100)
+                    .build());
+                quest.setCompetitiveMaxCompletions(8);
+                quest.setCompetitiveUsePercent(false);
+                quest.setBattlePassXPReward(35, 6);
+                quest.setCompletionTime(86400);
+            });
+
+        createCompetitiveQuest(manager, TaskTypeId.FISH_ITEM,
+            "Treasure Hunter",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("钓到稀有宝藏！"),
+                DARK_GRAY.wrap("前15%玩家获得奖励")
+            ),
+            Material.ENCHANTED_BOOK,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 1));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(Material.ENCHANTED_BOOK, Adapter.VANILLA_ITEM, 3, 3, 50, 50)
+                    .addType(Material.NAUTILUS_SHELL, Adapter.VANILLA_ITEM, 5, 5, 30, 40)
+                    .addType(Material.NAME_TAG, Adapter.VANILLA_ITEM, 5, 5, 20, 30)
+                    .build());
+                quest.setCompetitiveMaxCompletionPercent(0.15);
+                quest.setCompetitiveUsePercent(true);
+                quest.setBattlePassXPReward(25, 4);
+                quest.setCompletionTime(43200);
+            });
+
+        createCompetitiveQuest(manager, TaskTypeId.KILL_MOB,
+            "Elite Hunter",
+            Lists.newList(
+                RED.wrap("§c[竞争任务]"),
+                GRAY.wrap("击杀大量精英怪物！"),
+                DARK_GRAY.wrap("限10人完成")
+            ),
+            Material.TOTEM_OF_UNDYING,
+            quest -> {
+                quest.setObjectivesAmount(UniInt.of(1, 2));
+                quest.setObjectiveTable(QuestObjectiveTable.builder()
+                    .addType(EntityType.WITHER_SKELETON, Adapter.VANILLA_MOB, 50, 50, 40, 8)
+                    .addType(EntityType.BLAZE, Adapter.VANILLA_MOB, 80, 80, 35, 6)
+                    .addType(EntityType.ENDERMAN, Adapter.VANILLA_MOB, 100, 100, 25, 5)
+                    .build());
+                quest.setCompetitiveMaxCompletions(10);
+                quest.setCompetitiveUsePercent(false);
+                quest.setBattlePassXPReward(30, 5);
+                quest.setCompletionTime(86400);
+            });
+    }
+
+    private static void createCooperativeQuest(@NotNull QuestManager manager,
+                                               @NotNull String type,
+                                               @NotNull String name,
+                                               @NotNull List<String> desc,
+                                               @NotNull Material iconType,
+                                               @NotNull Consumer<Quest> consumer) {
+        TaskType<?, ?> taskType = Registries.TASK_TYPE.byKey(type);
+        if (taskType == null) return;
+
+        manager.createQuest(Strings.filterForVariable(name), quest -> {
+            quest.setType(taskType);
+            quest.setName(name);
+            quest.setDescription(desc);
+            quest.setIcon(NightItem.fromType(iconType));
+            quest.addReward(RewardDefaults.QUEST_CASH_MEDIUM);
+            quest.addReward(RewardDefaults.QUEST_CASH_HIGH);
+            quest.setBattlePassXPReward(20, 3);
+            quest.setCompletionTime(86400);
+            quest.setQuestType(su.nightexpress.quests.quest.definition.QuestType.COOPERATIVE);
+            quest.setCooperativeFormula("%maxplayer%*10");
+            
+            consumer.accept(quest);
+        });
+    }
+
+    private static void createCompetitiveQuest(@NotNull QuestManager manager,
+                                               @NotNull String type,
+                                               @NotNull String name,
+                                               @NotNull List<String> desc,
+                                               @NotNull Material iconType,
+                                               @NotNull Consumer<Quest> consumer) {
+        TaskType<?, ?> taskType = Registries.TASK_TYPE.byKey(type);
+        if (taskType == null) return;
+
+        manager.createQuest(Strings.filterForVariable(name), quest -> {
+            quest.setType(taskType);
+            quest.setName(name);
+            quest.setDescription(desc);
+            quest.setIcon(NightItem.fromType(iconType));
+            quest.addReward(RewardDefaults.QUEST_CASH_HIGH);
+            quest.setBattlePassXPReward(25, 5);
+            quest.setCompletionTime(43200);
+            quest.setQuestType(su.nightexpress.quests.quest.definition.QuestType.COMPETITIVE);
+            quest.setCompetitiveMaxCompletions(10);
+            quest.setCompetitiveUsePercent(false);
+            
+            consumer.accept(quest);
+        });
+    }
+
     private static void createQuest(@NotNull QuestManager manager,
                                     @NotNull String type,
                                     @NotNull String name,
@@ -402,6 +669,21 @@ public class QuestDefaults {
             quest.addReward(RewardDefaults.QUEST_CASH_LOW);
             quest.setBattlePassXPReward(5, 1);
             quest.setCompletionTime(3600 * 6);
+            
+            // 设置任务类型（默认为独立任务）
+            quest.setQuestType(su.nightexpress.quests.quest.definition.QuestType.INDEPENDENT);
+            
+            // 设置任务周期（默认为每日任务）
+            quest.setQuestPeriod(su.nightexpress.quests.quest.definition.QuestPeriod.DAILY);
+            
+            // 设置合作任务公式（即使不是合作任务也设置默认值）
+            quest.setCooperativeFormula("%maxplayer%*10");
+            
+            // 设置竞争任务配置（即使不是竞争任务也设置默认值）
+            quest.setCompetitiveMaxCompletions(10);
+            quest.setCompetitiveMaxCompletionPercent(0.1);
+            quest.setCompetitiveUsePercent(false);
+            
             consumer.accept(quest);
         });
     }

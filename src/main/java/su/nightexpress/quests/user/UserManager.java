@@ -29,4 +29,15 @@ public class UserManager extends AbstractUserManager<QuestsPlugin, QuestUser> {
 
         return new QuestUser(uuid, name, dateCreated, dateCreated, newQuestsDate, battlePassData, questData, milestoneData);
     }
+
+    @Override
+    protected void onShutdown() {
+        // 修复：在关闭时保存所有玩家的完整数据（包括任务进度和激活状态）
+        this.plugin.info("正在保存所有玩家数据...");
+        this.getLoaded().forEach(user -> this.dataManager.saveUser(user));
+        this.plugin.info("玩家数据保存完成，共 " + this.getLoaded().size() + " 个玩家");
+        
+        // 调用父类的清理逻辑
+        super.onShutdown();
+    }
 }

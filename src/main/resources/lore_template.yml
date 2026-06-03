@@ -1,0 +1,52 @@
+# 统一的任务Lore模板配置
+# 支持条件显示：[ALL], [INDEPENDENT], [COOPERATIVE], [COMPETITIVE]
+
+# 任务Lore模板
+Quest_Lore:
+  # 通用部分 - 所有任务都显示
+  - '[ALL] <gray>%quest_description%'
+  - '[ALL] '
+  
+  # 独立任务专用
+  - '[INDEPENDENT] <yellow>任务状态: <white>%status%'
+  - '[INDEPENDENT] '
+  
+  # 全服任务专用（合作+竞争）
+  - '[COOPERATIVE,COMPETITIVE] <yellow>当前完成: <white>%completed_players%<yellow>/<white>%max_players%<yellow>人'
+  - '[COOPERATIVE,COMPETITIVE] '
+  
+  # 任务目标
+  - '[ALL] <gold>任务目标:'
+  - '[ALL] %objectives%'
+  - '[ALL] '
+  
+  # 进度信息
+  - '[ALL] <gold>进度条: <white>%progress_bar%'
+  - '[ALL] <gold>进度: <white>%progress%<gold>%'
+  - '[COOPERATIVE,COMPETITIVE] <red>剩余时间: <white>%timeleft%'
+  - '[ALL] '
+  
+  # 奖励信息
+  - '[ALL] <gold>任务奖励: <yellow>%rewards_inline%'
+  - '[INDEPENDENT] '
+  
+  # 排名奖励（仅全服任务）
+  - '[COOPERATIVE,COMPETITIVE] <gold>第一名: <white>%rank_1_player% <dark_gray>- <yellow>%rank_1_contribution%'
+  - '[COOPERATIVE,COMPETITIVE]   <gold>奖励: <yellow>%rank_1_rewards%'
+  - '[COOPERATIVE,COMPETITIVE] <yellow>第二名: <white>%rank_2_player% <dark_gray>- <yellow>%rank_2_contribution%'
+  - '[COOPERATIVE,COMPETITIVE]   <yellow>奖励: <soft_yellow>%rank_2_rewards%'
+  - '[COOPERATIVE,COMPETITIVE] <soft_red>第三名: <white>%rank_3_player% <dark_gray>- <yellow>%rank_3_contribution%'
+  - '[COOPERATIVE,COMPETITIVE]   <soft_red>奖励: <soft_yellow>%rank_3_rewards%'
+
+# 任务名称格式
+Quest_Name_Format: '<gold>%quest_name%'
+
+# 可以为不同状态定义不同格式
+Quest_Name_Format_By_Status:
+  LOCKED: '<gray>%quest_name% <dark_gray>[已锁定]'
+  IN_PROGRESS: '<yellow>%quest_name% <gray>• <yellow>进行中'
+  COMPLETED: '<green>%quest_name% <gray>• <green>已完成'
+  FAILED: '<red>%quest_name% <gray>• <red>已失败'
+  ON_COOLDOWN: '<gray>%quest_name% <dark_gray>[冷却中]'
+
+

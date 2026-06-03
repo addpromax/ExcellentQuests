@@ -19,6 +19,7 @@ public class QuestGenericListener extends AbstractListener<QuestsPlugin> {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onJoin(PlayerJoinEvent event) {
-        this.manager.updatePlayerQuests(event.getPlayer());
+        // 玩家登录时检查并刷新任务
+        this.manager.checkAndRefreshPlayerQuests(event.getPlayer());
     }
 }

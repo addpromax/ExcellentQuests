@@ -42,6 +42,7 @@ public class Registries {
         registerAdapter(Adapter.VANILLA_BLOCK_STATE, AdapterFamily.BLOCK_STATE);
         registerAdapter(Adapter.VANILLA_ITEM, AdapterFamily.ITEM);
         registerAdapter(Adapter.VANILLA_ENCHANTMENT, AdapterFamily.ENCHANTMENT);
+        registerAdapter(Adapter.VANILLA_STRING, AdapterFamily.CUSTOM);  // 新增：注册字符串适配器
 
         registerExternal(HookPlugin.MYTHIC_MOBS, MythicMobAdapter::new, AdapterFamily.ENTITY);
         registerExternal(HookPlugin.EVEN_MORE_FISH, EvenMoreFishAdapter::new, AdapterFamily.ITEM);

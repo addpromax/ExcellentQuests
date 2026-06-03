@@ -22,7 +22,10 @@ public class BlockPlaceTaskListener extends TaskListener<Block, AdapterFamily<Bl
     public void onTaskBlockPlace(BlockPlaceEvent event) {
         Block block = event.getBlockPlaced();
         Player player = event.getPlayer();
-        if (!this.manager.canDoTasks(player)) return;
+        
+        if (!this.manager.canDoTasks(player)) {
+            return;
+        }
 
         this.progressQuests(player, block);
     }

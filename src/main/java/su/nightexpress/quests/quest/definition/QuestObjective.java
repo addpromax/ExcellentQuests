@@ -10,14 +10,18 @@ public record QuestObjective(int min, int max, double weight, double unitWorth) 
 
     @NotNull
     public static QuestObjective deserialize(@NotNull String rawData) {
-        SectionedData data = SectionedData.deserialize(rawData);
+        try {
+            SectionedData data = SectionedData.deserialize(rawData);
 
-        int min = data.getInt(0, 0, 0);
-        int max = data.getInt(0, 1, 0);
-        double weight = data.getDouble(1, 0, 0);
-        double unitWorth = data.getDouble(2, 0, 0);
+            int min = data.getInt(0, 0, 0);
+            int max = data.getInt(0, 1, 0);
+            double weight = data.getDouble(1, 0, 0);
+            double unitWorth = data.getDouble(2, 0, 0);
 
-        return new QuestObjective(min, max, weight, unitWorth);
+            return new QuestObjective(min, max, weight, unitWorth);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("无法解析目标数据: '" + rawData + "'. 期望格式: 'MIN;MAX WEIGHT UNIT_WORTH'", e);
+        }
     }
 
     @Override

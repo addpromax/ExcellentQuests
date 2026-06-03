@@ -69,7 +69,9 @@ public class ProgressionMenu extends LinkedMenu<QuestsPlugin, Milestone> impleme
                 int units = data.countTotalProgress(milestone);
                 //double progress = data.getTotalProgressValue(milestone);
                 NightItem item = data.isLevelCompleted(level) ? this.levelCompleted : (level == first ? this.levelInProgress : this.levelLocked);
-                List<Reward> rewards = this.plugin.getRewardManager().getMilestoneRewards(milestone);
+                
+                // 获取当前等级的奖励（而不是所有奖励）
+                List<Reward> rewards = this.plugin.getRewardManager().getMilestoneRewardForLevel(milestone, level);
 
                 return item.copy()
                     .hideAllComponents()

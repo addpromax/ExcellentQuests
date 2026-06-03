@@ -38,6 +38,12 @@ public class MilestoneData {
     }
 
     public boolean isReady(@NotNull Milestone milestone, int level) {
+        // 如果有定义分组，使用分组逻辑
+        if (!milestone.getObjectiveGroups().isEmpty()) {
+            return this.isReadyWithGroups(milestone, level);
+        }
+        
+        // 否则使用旧逻辑：每个目标独立计算
         return milestone.getObjectiveTable().getEntryMap().entrySet().stream().allMatch(entry -> {
             String fullName = entry.getKey();
             MilestoneObjective objective = entry.getValue();
@@ -48,6 +54,30 @@ public class MilestoneData {
             int objectiveProgress = this.getObjectiveProgress(fullName);
             return objectiveProgress >= required;
         });
+    }
+    
+    /**
+     * 使用分组逻辑检查是否完成
+     */
+    private boolean isReadyWithGroups(@NotNull Milestone milestone, int level) {
+        // 检查每个分组
+        for (su.nightexpress.quests.milestone.definition.ObjectiveGroup group : milestone.getObjectiveGroups()) {
+            int required = group.getRequiredAmount(level);
+            if (required <= 0) continue;
+            
+            // 累加组内所有成员的进度
+            int totalProgress = 0;
+            for (String member : group.getMembers()) {
+                totalProgress += this.getObjectiveProgress(member);
+            }
+            
+            // 如果有任何一个组未达到要求，返回 false
+            if (totalProgress < required) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     public double getTotalProgressValue(@NotNull Milestone milestone) {

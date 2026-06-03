@@ -35,6 +35,7 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
 
     private final Map<String, MilestoneCategory> categoryById;
     private final Map<String, Milestone>         milestoneById;
+    private final Map<TaskType<?, ?>, Set<Milestone>> milestonesByType;  // 按任务类型索引里程碑，提升性能
     private final String dirPath;
 
     private CategoriesMenu categoriesMenu;
@@ -46,6 +47,7 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
         this.dirPath = plugin.getDataFolder() + Config.DIR_MILESTONES;
         this.categoryById = new HashMap<>();
         this.milestoneById = new HashMap<>();
+        this.milestonesByType = new HashMap<>();
     }
 
     @Override
@@ -68,6 +70,7 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
     protected void onShutdown() {
         this.categoryById.clear();
         this.milestoneById.clear();
+        this.milestonesByType.clear();
 
         MilestoneCommands.shutdown();
     }
@@ -97,6 +100,7 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
 
             Milestone milestone = new Milestone(file, id);
             try {
+                milestone.setPlugin(this.plugin);  // 设置plugin引用以便在load时使用
                 milestone.load();
             }
             catch (QuestLoadException exception) {
@@ -105,6 +109,9 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
             }
 
             this.milestoneById.put(milestone.getId(), milestone);
+            
+            // 添加到任务类型索引，提升查询性能
+            this.milestonesByType.computeIfAbsent(milestone.getType(), k -> new HashSet<>()).add(milestone);
         });
 
         this.plugin.info("Loaded " + this.milestoneById.size() + " milestones.");
@@ -154,41 +161,95 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
     public <O, A extends AdapterFamily<O>> void progressMilestones(@NotNull Player player, @NotNull TaskType<O, A> taskType, @NotNull String fullName, int amount) {
         QuestUser user = this.plugin.getUserManager().getOrFetch(player);
 
-        // TODO Get milestones by mission type
-        this.getMilestones().forEach(milestone -> {
-            if (milestone.getType() != taskType) return;
-            if (user.isCompleted(milestone)) return;
+        // 使用索引直接获取匹配类型的里程碑，而不是遍历所有里程碑
+        Set<Milestone> typedMilestones = this.milestonesByType.get(taskType);
+        if (typedMilestones == null || typedMilestones.isEmpty()) {
+            return;
+        }
+
+        // 只遍历匹配类型的里程碑
+        typedMilestones.forEach(milestone -> {
+            if (user.isCompleted(milestone)) {
+                return;
+            }
 
             MilestoneData data = user.getMilestoneData(milestone);
 
             int level = data.getFirstIncompletedLevel(milestone);
-            if (level <= 0) return;
+            if (level <= 0) {
+                return;
+            }
 
             int required = milestone.getObjectiveRequirement(fullName, level);
-            if (required <= 0) return;
+            if (required <= 0) {
+                return;
+            }
+            
+            // 获取实际应该使用的目标键（如果是通配符匹配，返回通配符键）
+            String actualKey = milestone.getActualObjectiveKey(fullName);
 
-            int progress = data.getObjectiveProgress(fullName);
-            if (progress >= required) return;
-
+            int progress = data.getObjectiveProgress(actualKey);
             int total = Math.min(required, progress + amount);
 
-            data.setObjectiveProgress(fullName, total);
+            data.setObjectiveProgress(actualKey, total);
 
-            if (data.isReady(milestone, level)) {
-                data.addCompletedLevel(level);
-
-                List<Reward> rewards = this.plugin.getRewardManager().getMilestoneRewards(milestone);
-                int units = data.countTotalProgress(milestone);
-
-                rewards.forEach(milestoneReward -> milestoneReward.runCommands(player, units, level, 1D));
-
-                Lang.MILESTONES_MILESTONE_COMPLETED.message().send(player, replacer -> replacer
-                    .replace(milestone.replacePlaceholders())
-                    .replace(QuestsPlaceholders.GENERIC_LEVEL, String.valueOf(level))
-                    .replace(QuestsPlaceholders.GENERIC_REWARDS, rewards.stream().map(reward -> reward.getName(units, level, 1D)).collect(Collectors.joining(", ")))
-                );
-            }
+            // 检查并完成所有满足条件的等级（而不是只检查当前等级）
+            this.checkAndCompleteLevels(player, milestone, data, level);
         });
+    }
+    
+    /**
+     * 检查并完成所有满足条件的等级
+     * 从当前等级开始，逐级检查，只完成真正满足条件的等级
+     */
+    private void checkAndCompleteLevels(@NotNull Player player, @NotNull Milestone milestone, 
+                                        @NotNull MilestoneData data, int startLevel) {
+        int currentLevel = startLevel;
+        
+        // 从当前等级开始，逐级检查
+        while (currentLevel > 0 && currentLevel <= milestone.getLevels()) {
+            // 如果这个等级已经完成，跳到下一个
+            if (data.isLevelCompleted(currentLevel)) {
+                currentLevel++;
+                continue;
+            }
+            
+            // 检查这个等级是否满足条件
+            if (data.isReady(milestone, currentLevel)) {
+                data.addCompletedLevel(currentLevel);
+
+                // 获取当前等级对应的奖励（而不是所有奖励）
+                List<Reward> allRewards = this.plugin.getRewardManager().getMilestoneRewards(milestone);
+                int units = data.countTotalProgress(milestone);
+                
+                // 使用final变量在lambda中引用
+                final int completedLevel = currentLevel;
+                
+                // 奖励列表中，索引 0 对应等级 1，索引 1 对应等级 2，以此类推
+                // 所以等级 N 的奖励索引是 N-1
+                int rewardIndex = completedLevel - 1;
+                
+                if (rewardIndex >= 0 && rewardIndex < allRewards.size()) {
+                    Reward levelReward = allRewards.get(rewardIndex);
+                    
+                    levelReward.runCommands(player, units, completedLevel, 1D);
+                    
+                    Lang.MILESTONES_MILESTONE_COMPLETED.message().send(player, replacer -> replacer
+                        .replace(milestone.replacePlaceholders())
+                        .replace(QuestsPlaceholders.GENERIC_LEVEL, String.valueOf(completedLevel))
+                        .replace(QuestsPlaceholders.GENERIC_REWARDS, levelReward.getName(units, completedLevel, 1D))
+                    );
+                } else {
+                    this.plugin.warn("等级 " + completedLevel + " 没有对应的奖励！(索引: " + rewardIndex + ", 总奖励数: " + allRewards.size() + ")");
+                }
+                
+                // 继续检查下一个等级
+                currentLevel++;
+            } else {
+                // 这个等级不满足条件，停止检查
+                break;
+            }
+        }
     }
 
     @NotNull
