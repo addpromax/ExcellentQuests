@@ -56,7 +56,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
     @Override
     protected void onLoad() {
-        FileConfig config = FileConfig.loadOrExtract(this.plugin, FILE_NAME);
+        FileConfig config = FileConfig.load(this.plugin.getDataFolder().getAbsolutePath(), FILE_NAME);
 
         config.initializeOptions(BattlePassConfig.class);
         this.plugin.runTaskAsync(task -> this.loadSeasons());
@@ -177,6 +177,7 @@ public class BattlePassManager extends AbstractManager<QuestsPlugin> {
 
         this.setSeason(newSeason); // Set as current season, as there should be no more than 1 active/scheduled season.
         this.loadSeason(newSeason); // Load it to the map.
+        this.checkPremiums();
 
         Lang.BATTLE_PASS_SEASON_LAUNCHED.message().broadcast(replacer -> replacer.replace(newSeason.replacePlaceholders()));
     }

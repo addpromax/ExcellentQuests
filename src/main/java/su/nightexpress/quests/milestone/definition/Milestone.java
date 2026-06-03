@@ -6,12 +6,12 @@ import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.StringUtil;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.quests.QuestsAPI;
 import su.nightexpress.quests.QuestsPlaceholders;
 import su.nightexpress.quests.QuestsPlugin;
 import su.nightexpress.quests.api.IQuest;
 import su.nightexpress.quests.api.exception.QuestLoadException;
 import su.nightexpress.quests.config.Config;
-import su.nightexpress.quests.registry.Registries;
 import su.nightexpress.quests.task.TaskType;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class Milestone implements IQuest {
     private int                          levels;
     private MilestoneObjectiveTable      objectiveTable;
     private List<ObjectiveGroup>         objectiveGroups;  // 目标组列表
-    private List<String> rewards;
+    private List<String>                 rewards;
     private Map<String, List<String>>    filters;  // 筛选器
 
     public Milestone(@NotNull File file, @NotNull String id) {
@@ -48,7 +48,7 @@ public class Milestone implements IQuest {
         String path = "";
 
         String typeName = ConfigValue.create(path + ".Type", "null").read(config);
-        this.type = Registries.TASK_TYPE.byKey(typeName);
+        this.type = QuestsAPI.plugin().getTaskTypeRegistry().getTypeById(typeName);
         if (this.type == null) {
             throw new QuestLoadException("Invalid milestone type '" + typeName + "'!");
         }
@@ -216,14 +216,8 @@ public class Milestone implements IQuest {
         return this.objectiveTable.getEntryMap().values().stream().mapToInt(objective -> objective.getAmount(level)).sum();
     }
 
-    @NotNull
     @Override
-    public File getFile() {
-        return this.file;
-    }
-
     @NotNull
-    @Override
     public Path getPath() {
         return this.file.toPath();
     }

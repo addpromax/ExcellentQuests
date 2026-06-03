@@ -28,6 +28,7 @@ import su.nightexpress.quests.user.QuestUser;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -167,6 +168,8 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
             return;
         }
 
+        AtomicBoolean progressed = new AtomicBoolean(false);
+
         // 只遍历匹配类型的里程碑
         typedMilestones.forEach(milestone -> {
             if (user.isCompleted(milestone)) {
@@ -192,10 +195,15 @@ public class MilestoneManager extends AbstractManager<QuestsPlugin> {
             int total = Math.min(required, progress + amount);
 
             data.setObjectiveProgress(actualKey, total);
+            progressed.set(true);
 
             // 检查并完成所有满足条件的等级（而不是只检查当前等级）
             this.checkAndCompleteLevels(player, milestone, data, level);
         });
+
+        if (progressed.get()) {
+            this.plugin.getUserManager().save(user);
+        }
     }
     
     /**
